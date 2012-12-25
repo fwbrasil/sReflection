@@ -5,7 +5,6 @@ import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
 import java.lang.reflect.InvocationTargetException
 import java.lang.{ Class => JClass }
-import com.sun.tools.example.debug.bdi.MethodNotFoundException
 import scala.reflect.Code
 
 object SReflection {
@@ -110,16 +109,17 @@ object SReflection {
 			case _ => null
 		}).asInstanceOf[Class[Any]])
 
-	def getCompanionObject(clazz: Class[_]) = {
-		val companionClassOption =
-			try {
-				Option(Class.forName(clazz.getName + "$"))
-			} catch {
-				case e: ClassNotFoundException =>
-					None
-			}
-		companionClassOption.map(_.getField("MODULE$").get(clazz))
-	}
+	def getCompanionObject(clazz: Class[_]) =
+		try {
+			val companionClass = Class.forName(clazz.getName + "$")
+			val field = companionClass.getField("MODULE$")
+			Option(field.get(clazz))
+		} catch {
+			case e: ClassNotFoundException =>
+				None
+			case e: NoSuchFieldException =>
+				None
+		}
 
 	def getMethod(clazz: Class[_], name: String, paramsTypes: Class[_]*) =
 		try

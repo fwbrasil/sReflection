@@ -2,39 +2,37 @@ import sbt._
 import Keys._
 
 object SReflectionBuild extends Build {
-  
+
 	/* Dependencies */
-  val junit = "junit" % "junit" % "4.4" % "test"
+	val junit = "junit" % "junit" % "4.4" % "test"
 	val specs2 = "org.specs2" %% "specs2" % "1.12.1" % "test"
-	
+
 	/* Resolvers */
 	val customResolvers = Seq(
-    "snapshots" at "http://scala-tools.org/repo-snapshots",
-    "releases" at "http://scala-tools.org/repo-releases",
-    "Maven" at "http://repo1.maven.org/maven2/"
+		"snapshots" at "http://scala-tools.org/repo-snapshots",
+		"releases" at "http://scala-tools.org/repo-releases",
+		"Maven" at "http://repo1.maven.org/maven2/"
 	)
-	
-  lazy val sReflection = 
-  	Project(
-  		id = "sReflection",
-  		base = file("."),
-  		settings = Defaults.defaultSettings ++ Seq(
-        libraryDependencies ++= 
-          Seq(junit, specs2),
-        libraryDependencies <<= (scalaVersion, libraryDependencies) { (sv, deps) =>
-            deps :+ "org.scala-lang" % "scala-compiler" % sv
-        },
-        libraryDependencies <<= (scalaVersion, libraryDependencies) { (sv, deps) =>
-            deps :+ "org.scala-lang" % "scalap" % sv
-        },
-//      publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))), 
-        publishTo := Option(Resolver.ssh("fwbrasil.net repo", "fwbrasil.net", 8080) as("maven") withPermissions("0644")),
-	      organization := "net.fwbrasil",
-	      scalaVersion := "2.9.2",
-        crossScalaVersions := Seq("2.9.1", "2.9.2"),
-	      version := "1.0",
-	      resolvers ++= customResolvers
-      )
-  	)
+
+	lazy val sReflection =
+		Project(
+			id = "sreflection",
+			base = file("."),
+			settings = Defaults.defaultSettings ++ Seq(
+				libraryDependencies ++=
+					Seq(junit, specs2),
+				libraryDependencies <<= (scalaVersion, libraryDependencies) { (sv, deps) =>
+					deps :+ "org.scala-lang" % "scala-compiler" % sv
+					deps :+ "org.scala-lang" % "scalap" % sv
+				},
+				//      publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))), 
+				publishTo := Option(Resolver.ssh("fwbrasil.net repo", "fwbrasil.net", 8080) as ("maven") withPermissions ("0644")),
+				organization := "net.fwbrasil",
+				scalaVersion := "2.9.1",
+				crossScalaVersions := Seq("2.9.1", "2.9.2"),
+				version := "0.1",
+				resolvers ++= customResolvers
+			)
+		)
 
 }

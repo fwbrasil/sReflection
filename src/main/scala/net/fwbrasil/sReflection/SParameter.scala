@@ -5,7 +5,6 @@ import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
 import java.lang.reflect.InvocationTargetException
 import java.lang.{ Class => JClass }
-import com.sun.tools.example.debug.bdi.MethodNotFoundException
 import scala.reflect.Code
 import SReflection._
 
