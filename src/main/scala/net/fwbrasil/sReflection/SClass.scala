@@ -5,7 +5,6 @@ import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
 import java.lang.reflect.InvocationTargetException
 import java.lang.{ Class => JClass }
-import scala.reflect.Code
 import ScalaSigReader._
 import SReflection._
 
@@ -68,84 +67,6 @@ class SClass[C](val clazz: Class[C], symbol: ClassSymbol) extends SymbolVisibili
 	def sBehaviors =
 		sConstructors ++ sMethods
 
-	def sField(code: Code[(C) => Unit]) =
-		try {
-			//heuristic
-			val method = code.tree.asInstanceOf[scala.reflect.Function].body.asInstanceOf[scala.reflect.Block].stats.head.asInstanceOf[scala.reflect.Select].sym.asInstanceOf[scala.reflect.Method]
-			sFields.find(_.name == method.name)
-		} catch {
-			case e: ClassCastException =>
-				throw new IllegalStateException("Can't reflect field", e)
-		}
-
-	def sMethod(code: Code[(C) => Unit]): Option[SMethod[C]] =
-		sMethod(code)
-
-	def sMethod[V1: Manifest](code: Code[(C, V1) => Unit]): Option[SMethod[C]] =
-		sMethod(code, erasureOf[V1])
-
-	def sMethod[V1: Manifest, V2: Manifest](code: Code[(C, V1, V2) => Unit]): Option[SMethod[C]] =
-		sMethod(code, erasureOf[V1], erasureOf[V2])
-
-	def sMethod[V1: Manifest, V2: Manifest, V3: Manifest](code: Code[(C, V1, V2, V3) => Unit]): Option[SMethod[C]] =
-		sMethod(code, erasureOf[V1], erasureOf[V2], erasureOf[V3])
-
-	def sMethod[V1: Manifest, V2: Manifest, V3: Manifest, V4: Manifest](code: Code[(C, V1, V2, V3, V4) => Unit]): Option[SMethod[C]] =
-		sMethod(code, erasureOf[V1], erasureOf[V2], erasureOf[V3], erasureOf[V4])
-
-	def sMethod[V1: Manifest, V2: Manifest, V3: Manifest, V4: Manifest, V5: Manifest](code: Code[(C, V1, V2, V3, V4, V5) => Unit]): Option[SMethod[C]] =
-		sMethod(code, erasureOf[V1], erasureOf[V2], erasureOf[V3], erasureOf[V4], erasureOf[V5])
-
-	// heuristic
-	private def sMethod(code: Code[_], types: Class[_]*): Option[SMethod[C]] = {
-		val method =
-			try {
-				code.tree.asInstanceOf[scala.reflect.Function].body.asInstanceOf[scala.reflect.Select].sym.asInstanceOf[scala.reflect.Method]
-			} catch {
-				case e: ClassCastException =>
-					try
-						code.tree.asInstanceOf[scala.reflect.Function].body.asInstanceOf[scala.reflect.Apply].fun.asInstanceOf[scala.reflect.Select].sym.asInstanceOf[scala.reflect.Method]
-					catch {
-						case e: ClassCastException =>
-							try
-								code.tree.asInstanceOf[scala.reflect.Function].body.asInstanceOf[scala.reflect.Block].stats.head.asInstanceOf[scala.reflect.Apply].fun.asInstanceOf[scala.reflect.Select].sym
-							catch {
-								case e =>
-									throw new IllegalStateException("Can't reflect method", e)
-							}
-					}
-			}
-
-			def supers(classes: Set[Class[_]]) =
-				classes.map(clazz => clazz.getInterfaces.toSet ++ Option(clazz.getSuperclass)).flatten
-
-			def depthInTree(reference: Class[_], clazz: Class[_]) = {
-				if (reference.isAssignableFrom(clazz)) {
-					var currSupers = Set[Class[_]](clazz)
-					var i = 0
-					while (!currSupers.contains(reference)) {
-						currSupers = supers(currSupers)
-						i += 1
-					}
-					i
-				} else
-					throw new IllegalArgumentException("Invalid hierarchy")
-			}
-
-		val candidates =
-			sMethods.filter(m => {
-				val p1 = m.parametersTypes
-				val p2 = types.toList
-				m.name == method.name && p1.size == p2.size &&
-					(0 until p1.size).toList.forall(i => p1(i).isAssignableFrom(p2(i)))
-			})
-		val sorted = candidates.sortBy {
-			m =>
-				val dists = (0 until m.parametersTypes.size).toList.map(i => depthInTree(m.parametersTypes(i), types(i)))
-				dists.sum
-		}
-		sorted.headOption
-	}
 	def isInit(methodSymbol: Symbol) =
 		methodSymbol.name.trim == "<init>" || methodSymbol.name.trim == "$init$"
 	def isConstructor(methodSymbol: Symbol) =

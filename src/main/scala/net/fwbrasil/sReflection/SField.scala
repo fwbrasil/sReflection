@@ -5,7 +5,6 @@ import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
 import java.lang.reflect.InvocationTargetException
 import java.lang.{ Class => JClass }
-import scala.reflect.Code
 
 class SField[C](val clazz: Class[C], val getter: SMethod[C], val setterOption: Option[SMethod[C]]) extends Serializable {
 	val fieldType =

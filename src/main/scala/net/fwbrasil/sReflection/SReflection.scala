@@ -5,7 +5,6 @@ import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
 import java.lang.reflect.InvocationTargetException
 import java.lang.{ Class => JClass }
-import scala.reflect.Code
 
 object SReflection {
 
@@ -73,7 +72,7 @@ object SReflection {
 			val methodOption = try
 				Some(packageClass.getMethod(clazz.name))
 			catch {
-				case e => None
+				case e: NoSuchMethodException => None
 			}
 			if (methodOption.isDefined) {
 				val method = methodOption.get
