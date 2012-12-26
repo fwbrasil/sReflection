@@ -1,5 +1,6 @@
 package net.fwbrasil.sReflection
 
+import language.reflectiveCalls
 import scala.tools.scalap.scalax.rules.scalasig.SymbolInfo
 
 abstract class SymbolVisibility(symbol: {

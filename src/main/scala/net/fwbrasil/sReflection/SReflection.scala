@@ -1,5 +1,7 @@
 package net.fwbrasil.sReflection
 
+import language.implicitConversions
+import language.reflectiveCalls
 import scala.tools.scalap.scalax.rules.scalasig._
 import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
@@ -13,7 +15,7 @@ object SReflection {
 	implicit def getSClass[C](obj: C) = new { def getSClass = SClass(obj.getClass.asInstanceOf[Class[C]]) }
 	implicit def toSClass[C](clazz: Class[C]): SClass[C] = SClass(clazz)
 
-	def sClassOf[C: Manifest] = SClass(manifest[C].erasure)
+	def sClassOf[C: Manifest] = SClass(manifest[C].runtimeClass)
 
 	def findGenericParameters(typeRefType: TypeRefType): List[Class[_]] =
 		typeRefType.typeArgs.map(typeToJavaClass(_)).toList

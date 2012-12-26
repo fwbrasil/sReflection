@@ -72,7 +72,7 @@ class SClass[C](val clazz: Class[C], symbol: ClassSymbol) extends SymbolVisibili
 	def isConstructor(methodSymbol: Symbol) =
 		methodSymbol.name.trim == "<init>"
 	private def erasureOf[T: Manifest] =
-		manifest[T].erasure.asInstanceOf[Class[T]]
+		manifest[T].runtimeClass.asInstanceOf[Class[T]]
 }
 
 object SClass {
