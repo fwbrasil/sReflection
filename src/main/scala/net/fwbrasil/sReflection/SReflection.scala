@@ -15,7 +15,7 @@ object SReflection {
 	implicit def getSClass[C](obj: C) = new { def getSClass = SClass(obj.getClass.asInstanceOf[Class[C]]) }
 	implicit def toSClass[C](clazz: Class[C]): SClass[C] = SClass(clazz)
 
-	def sClassOf[C: Manifest] = SClass(manifest[C].runtimeClass)
+	def sClassOf[C: Manifest] = SClass(manifest[C].runtimeClass).asInstanceOf[SClass[C]]
 
 	def findGenericParameters(typeRefType: TypeRefType): List[Class[_]] =
 		typeRefType.typeArgs.map(typeToJavaClass(_)).toList
@@ -111,10 +111,13 @@ object SReflection {
 		}).asInstanceOf[Class[Any]])
 
 	def getCompanionObject(clazz: Class[_]) =
+		_getCompanionObject(clazz)
+			.orElse(_getCompanionObject(Class.forName(clazz.getName + "$")))
+
+	private def _getCompanionObject(companionClass: => Class[_]) =
 		try {
-			val companionClass = Class.forName(clazz.getName + "$")
 			val field = companionClass.getField("MODULE$")
-			Option(field.get(clazz))
+			Option(field.get(companionClass))
 		} catch {
 			case e: ClassNotFoundException =>
 				None
