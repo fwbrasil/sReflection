@@ -29,7 +29,7 @@ object SReflectionBuild extends Build {
 				publishTo := Option(Resolver.ssh("fwbrasil.net repo", "fwbrasil.net", 8080) as ("maven") withPermissions ("0644")),
 				organization := "net.fwbrasil",
 				scalaVersion := "2.10.0",
-				version := "0.2",
+				version := "0.3-SNAPSHOT",
 				resolvers ++= customResolvers
 			)
 		)
