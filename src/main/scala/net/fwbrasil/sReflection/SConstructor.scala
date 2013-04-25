@@ -5,17 +5,18 @@ import scala.collection.mutable.{ HashMap, SynchronizedMap }
 import java.lang.reflect.{ Constructor => JConstructor, Method => JMethod, Array => jArray }
 import java.lang.reflect.InvocationTargetException
 import java.lang.{ Class => JClass }
+import java.lang.reflect.Constructor
 
 class SConstructor[C](val clazz: Class[C], symbol: MethodSymbol) extends SBehavior[C](symbol, "novo") {
     type JType = JConstructor[C]
-    def jBehavior =
+    def jBehavior: Constructor[C] =
         try
             clazz.getConstructor(parametersTypes: _*)
         catch {
             case e: NoSuchMethodException =>
                 if (clazz.getDeclaringClass != null)
                     clazz.getConstructor(List(clazz.getDeclaringClass).++(parametersTypes): _*)
-                else throw e
+                else null
         }
     val returnType =
         clazz
